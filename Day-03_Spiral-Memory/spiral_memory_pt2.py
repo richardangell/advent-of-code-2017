@@ -1,4 +1,37 @@
 import sys
+import spiral_memory as sm
+
+
+def ring_size(ring):
+
+    if ring == 0:
+
+        return(1)
+
+    else:
+
+        return(8 * ring)
+
+
+def non_diag_tiles(ring):
+
+    return((ring_size(ring) - 4) / 4)
+
+
+def edge_tiles(ring):
+
+    return(2 * ring)
+
+
+def tiles_adjacent(coord1, coord2):
+
+    if (abs(coord1[0] - coord2[0]) <= 1) & (abs(coord1[1] - coord2[1]) <= 1):
+
+        return(True)
+
+    else:
+
+        return(False)
 
 
 def spiral_memory_pt2(value, verbose = False):
@@ -7,214 +40,141 @@ def spiral_memory_pt2(value, verbose = False):
 
     verbose = bool(verbose)
 
-    # list to hold values
-    spiral_values = [0] * value
-    spiral_values[0] = 1
-    spiral_values[1] = 1
+    current_ring = 0
 
-    spiral_tile_types = [""] * value
-    spiral_tile_types[0] = "start"
-    spiral_tile_types[1] = "after_diag"
+    current_edge = 1
 
-    tile_type = spiral_tile_types[1]
+    current_ring_size = ring_size(current_ring)
 
-    # which ring of the spiral we are on
-    ring = 1
+    current_ring_edge_tiles = edge_tiles(current_ring)
 
-    # number of elements / tiles in the current ring
-    ring_size = 8
+    # list to store the indices of the current and previous ring tiles
+    current_ring_indices = [0]
+    previous_ring_indices = []
 
-    ring_start_index = 1
+    coords = [(0, 0)]
 
-    # total number of elements in all rings currently in the sprial
-    total_sprial_size = 8 + 1
+    tiles_on_edge = 1
 
-    # number of non-diagonal, non-one-after-diagonal elements on an edge of the current ring
-    ring_edge_adj_tiles = 0
+    tiles_on_ring = 1
 
-    tiles_after_diagonal = 0
+    # list to store spiral values
+    adjacent_sum = [0] * value
+    adjacent_sum[0] = 1
 
-    ring_diagonal_counter = 0
+    if verbose:
 
-    diagonal_indices = []
+        print(coords[0])
 
-    #--------------------------------------------------------------------------#
-    # Loop through tiles / cells from 3rd onwards
-    #--------------------------------------------------------------------------#
+    for i in range(1, value, 1):
 
-    for i in range(2, value, 1):
+        if tiles_on_edge == current_ring_edge_tiles:
 
-        #----------------------------------------------------------------------#
-        # Determine which type of tile we are on given the previous tile
-        #----------------------------------------------------------------------#
+            current_edge = current_edge + 1
 
-        # if the previous tile was daig set the current tile to diagonal
-        if tile_type == "diag":
-
-            tile_type = "after_diag"
-
-            tiles_after_diagonal = 0
-
-        # if the previous tile was one after a diagonal set the current tile
-        # to either diagonal or adjacent (more than one after diagonal)
-        elif tile_type == "after_diag":
-
-            tiles_after_diagonal = 1
-
-            if (ring_edge_adj_tiles > 0) & (tiles_after_diagonal <= ring_edge_adj_tiles):
-
-                tile_type = "adj"
-
-            else:
-
-                tile_type = "diag"
-
-                ring_diagonal_counter = ring_diagonal_counter + 1
-
-                diagonal_indices = diagonal_indices + [i]
-
-        elif tile_type == "adj":
-
-            tiles_after_diagonal = tiles_after_diagonal + 1
-
-            if (ring_edge_adj_tiles > 0) & (tiles_after_diagonal <= ring_edge_adj_tiles):
-
-                tile_type = "adj"
-
-            else:
-
-                tile_type = "diag"
-
-                ring_diagonal_counter = ring_diagonal_counter + 1
-
-                diagonal_indices = diagonal_indices + [i]
-
-        #----------------------------------------------------------------------#
-        # Check if the current tile has traversed into a new ring
-        #----------------------------------------------------------------------#
-
-        # marks entry onto a new ring
-        if i == total_sprial_size:
-
-            new_ring = True
-
-            ring = ring + 1
-
-            ring_size = ring * 8
-
-            ring_edge_adj_tiles = (ring_size - 8) / 4
-
-            total_sprial_size = total_sprial_size + ring_size
-
-            # reset diagonal tiles passed counter
-            ring_diagonal_counter = 0
-
-            prev_ring_start_index = ring_start_index
-
-            ring_start_index = i
+        # moving to a new ring means moving one tile to the right
+        if tiles_on_ring == current_ring_size:
 
             if verbose:
 
-                print("new ring:", ring)
+                print("new ring")
+
+            previous_ring_indices = current_ring_indices
+
+            current_ring = current_ring + 1
+
+            current_ring_size = ring_size(current_ring)
+
+            current_ring_indices = [x for x in range(i, i  + current_ring_size)]
+
+            current_ring_edge_tiles = edge_tiles(current_ring)
+
+            coords = coords + [(coords[i - 1][0] + 1, coords[i - 1][1])]
+
+            tiles_on_edge = 1
+
+            tiles_on_ring = 1
+
+            current_edge = 1
+
+            if verbose:
+
+                print("current_ring_indices:", current_ring_indices)
+
+                print("previous_ring_indices:", previous_ring_indices)
 
         else:
 
-            new_ring = False
+            if current_edge == 1:
 
-        #----------------------------------------------------------------------#
-        # Calculate index of tile perpendicular to current tile
-        #----------------------------------------------------------------------#
+                coords = coords + [(coords[i - 1][0], coords[i - 1][1] + 1)]
 
-        if ring > 1:
+            elif current_edge == 2:
 
-            if tile_type == "adj":
+                coords = coords + [(coords[i - 1][0] - 1, coords[i - 1][1])]
 
-                adj_index_dist = 9 + ((ring - 2) * 4) + (ring_diagonal_counter * 2)
+            elif current_edge == 3:
 
-            elif tile_type == "diag":
+                coords = coords + [(coords[i - 1][0], coords[i - 1][1] - 1)]
 
-                adj_index_dist = 0
+            elif current_edge == 4:
 
-            elif tile_type == "after_diag":
+                coords = coords + [(coords[i - 1][0] + 1, coords[i - 1][1])]
 
-                if new_ring:
+            tiles_on_edge = tiles_on_edge + 1
 
-                    adj_index_dist = 1
-
-                else:
-
-                    adj_index_dist = 9 + ((ring - 2) * 4) + (ring_diagonal_counter * 2)
-
-        else:
-
-            adj_index_dist = 1
+            tiles_on_ring = tiles_on_ring + 1
 
         if verbose:
 
-            print("i:", i, "-", tile_type, "-", adj_index_dist)
+            print("i =", i, ":", coords[i], "tiles_on_edge", tiles_on_edge, "tiles_on_ring", tiles_on_ring, "current_edge", current_edge)
 
-        spiral_tile_types[i] = tile_type
+        if tiles_on_edge == current_ring_edge_tiles:
 
-        #----------------------------------------------------------------------#
-        # Determine the indices of tiles to add for the current tile
-        #----------------------------------------------------------------------#
+            current_edge = current_edge + 1
 
-        # always add the previous tile
-        indices_to_add = [i - 1]
+            tiles_on_edge = 0
 
-        # for diagonals add the previous tile on the same diagonal plus the previous tile (WORKING)
-        if tile_type == "diag":
-
-            if ring > 1:
-
-                # get the index of the previous tile on the same diagonal
-                indices_to_add = indices_to_add + [diagonal_indices[len(diagonal_indices) - 5]]
-
-            else:
-
-                indices_to_add = indices_to_add + [0]
-
-        # for tiles one after a diagonal sum the same tiles the diagonal summed (plus the diagonal itself)
-        elif tile_type == "after_diag":
-
-            # if the tile has moved to a new ring get adjacent + 1 tile up index
-            if new_ring:
-
-                indices_to_add = indices_to_add + [prev_ring_start_index]
-
-            else:
-
-                indices_to_add = indices_to_add + [i - 2]
-
-                if ring > 1:
-
-                    indices_to_add = indices_to_add + [diagonal_indices[len(diagonal_indices) - 5]] + [diagonal_indices[len(diagonal_indices) - 5] + 1]
-
-                else:
-
-                    indices_to_add = indices_to_add + [0]
-
-        elif tile_type == "adj":
-
-            # get the index of the adjacent tile from the previous ring (not diagonal)
-            indices_to_add = indices_to_add + [i - adj_index_dist]
+        indices_to_add = []
 
         if verbose:
 
-            print("indices_to_add:", indices_to_add)
+            print("tiles to check adjacency:", [x for x in previous_ring_indices + current_ring_indices if x <= i - 1])
 
-        #----------------------------------------------------------------------#
-        # Add together adjacent tiles
-        #----------------------------------------------------------------------#
+        # loop through the tiles in the current ring and the previous ring where
+        # the tiles are less in index than value - 1 i.e. they appear in the non spiral list before i
+        # note i - 1 deals with zero indexing
+        for x in [x for x in previous_ring_indices + current_ring_indices if x <= i - 1]:
 
+            if tiles_adjacent(coords[i], coords[x]):
 
+                indices_to_add = indices_to_add + [x]
 
-        #----------------------------------------------------------------------#
-        # Check exit condition: tile sum gt tile index
-        #----------------------------------------------------------------------#
+        if verbose:
 
+            print("tiles to sum:", indices_to_add)
 
+        current_sum = 0
 
+        for k in indices_to_add:
+
+            current_sum = current_sum + adjacent_sum[k]
+
+        adjacent_sum[i] = current_sum
+
+        if current_sum > value:
+
+            print("breaking loop, condition met: current_sum > value")
+
+            print(current_sum)
+
+            return(current_sum)
+
+            break
+
+    if verbose:
+
+        print(adjacent_sum)
 
 
 if __name__ == '__main__':
