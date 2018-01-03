@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, '/Users/richardangell/Projects/advent-of-code-2017/Day-04_High-Entropy-Passphrases')
+sys.path.insert(0, '..')
 import passphrases as pp
 
 

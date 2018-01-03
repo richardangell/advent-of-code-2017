@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, '/Users/richardangell/Projects/advent-of-code-2017/Day-01_Inverse-Captcha')
+sys.path.insert(0, '..')
 import inverse_captcha as ic
 
 

@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, '/Users/richardangell/Projects/advent-of-code-2017/Day-02_Corruption-Checksum')
+sys.path.insert(0, '..')
 import corruption_checksum_pt2 as cc2
 
 
