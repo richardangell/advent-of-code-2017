@@ -32,14 +32,17 @@ def read_input(file):
     return(output)
 
 
-def update_register(input):
+def update_register_largest(input):
     """Creates and updates the register according to the rules in the input.
+    Returns the largest value held by the register during update.
 
     Keyword arguments:
     input - output from read_input function giving update instructions (list)
     """
 
     register = {}
+
+    largest_value = 0
 
     # loop through all input lines
     for i in range(len(input)):
@@ -127,13 +130,18 @@ def update_register(input):
                       "not recognised for input row",
                       i)
 
-    return(register)
+            if register[name] > largest_value:
+
+                largest_value = register[name]
+
+    return(largest_value)
 
 
 def find_largest_value(file, verbose = False):
     """Reads the input file.
     Updates the register according to the instructions in the input.
-    Finds and returns the largest value in the register.
+    Finds and returns the largest value in the register at any point during
+    the update.
 
     Keyword arguments:
     file - name of input file (str)
@@ -142,16 +150,7 @@ def find_largest_value(file, verbose = False):
 
     input = read_input(file)
 
-    register = update_register(input)
-
-    largest_value = 0
-
-    # find largest value in dict
-    for k in list(register.keys()):
-
-        if register[k] > largest_value:
-
-            largest_value = register[k]
+    largest_value = update_register_largest(input)
 
     print(largest_value)
 
